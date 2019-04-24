@@ -11,14 +11,14 @@ import java.util.*;
  * @author raquel
  */
 public interface ClientInterface extends java.rmi.Remote{
-    public void nuevoAmigoConectado(ClientInterface amigoConectado) 
-      throws java.rmi.RemoteException;
-    public void nuevoAmigoDesconectado(ClientInterface amigoConectado) 
-      throws java.rmi.RemoteException;
-      
-    public Vector getAmigos() throws java.rmi.RemoteException;
-    public void setAmigos(Vector amigos) throws java.rmi.RemoteException;
-    public String getNombre()throws java.rmi.RemoteException;
-
-    
+    public void nuevoAmigoConectado(ClientInterface amigoConectado) throws java.rmi.RemoteException;
+    public void nuevoAmigoDesconectado(ClientInterface amigoDesconectado) throws java.rmi.RemoteException; 
+    public HashMap<String, ClientInterface> getAmigos() throws java.rmi.RemoteException;
+    public void setAmigos(ArrayList<String> amigos) throws java.rmi.RemoteException;
+    public HashMap<String, ClientInterface> getAmigosConectados();
+    public HashMap<String, ClientInterface> getPeticionesAmistad();
+    public void setAmigosConectados(HashMap<String, ClientInterface> amigosConectados);
+    public void setPeticionesAmistad(ArrayList<String> peticionesAmistad);
+    public String getNombre();
+    public void setNombre(String nombre);
 }
