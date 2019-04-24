@@ -13,7 +13,7 @@ import java.util.Vector;
  */
 public interface ServerInterface extends java.rmi.Remote{
     
-    public Vector iniciarSesion(ClientInterface callbackClientObject) throws java.rmi.RemoteException;
+    public void iniciarSesion(ClientInterface callbackClientObject) throws java.rmi.RemoteException;
 
     public void cerrarSesion( ClientInterface callbackClientObject)throws java.rmi.RemoteException;
     
