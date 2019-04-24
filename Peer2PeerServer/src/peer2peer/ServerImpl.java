@@ -30,7 +30,6 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         super();
         this.initConexion();
         clientesActivos = new HashMap<>();
-        //
     }
 
     public void iniciarSesion(ClientInterface usuario) throws java.rmi.RemoteException {

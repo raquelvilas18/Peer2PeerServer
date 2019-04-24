@@ -17,6 +17,6 @@ public interface ServerInterface extends java.rmi.Remote{
 
     public void cerrarSesion( ClientInterface callbackClientObject)throws java.rmi.RemoteException;
     
-    public ClientInterface buscarPersona(String nombre);
+    public ClientInterface buscarPersona(String nombre)throws java.rmi.RemoteException;
     
 }
