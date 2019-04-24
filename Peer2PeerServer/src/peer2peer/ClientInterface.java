@@ -9,13 +9,6 @@ package peer2peer;
  *
  * @author raquel
  */
-public class Peer2PeerServer {
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
-    }
+public interface ClientInterface {
     
 }
