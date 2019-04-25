@@ -21,4 +21,8 @@ public interface ServerInterface extends java.rmi.Remote{
     
     public void enviarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
     
+    public void aceptarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
+    
+    public void rechazarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
+    
 }

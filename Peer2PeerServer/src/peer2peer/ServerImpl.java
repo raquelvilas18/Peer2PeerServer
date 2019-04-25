@@ -73,7 +73,41 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public void aceptarPeticion(String emisor, String receptor){
+        eliminarPeticionBD(emisor,receptor);
+        PreparedStatement stm;
+        try{
+            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
+            stm.setString(1,emisor);
+            stm.setString(2,receptor);
+            stm.executeUpdate();
+            
+            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
+            stm.setString(2,emisor);
+            stm.setString(1,receptor);
+            stm.executeUpdate();
+            
+        }catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void rechazarPeticion(String emisor, String receptor){
+       eliminarPeticionBD(emisor,receptor);
+    }
 
+    private void eliminarPeticionBD(String emisor, String receptor){
+         PreparedStatement stm;
+        try{
+            stm = conexion.prepareStatement("DELETE FROM peticiones WHERE emisor=? AND receptor=?");
+            stm.setString(1,emisor);
+            stm.setString(2, receptor);
+            stm.executeUpdate();
+        }catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     //Consulta en la base todos los usuarios que contengan los caracteres buscados en su nombre
     public String[] buscarPersona(String nombre) {
         PreparedStatement stm;
