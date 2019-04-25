@@ -60,6 +60,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         //NOTIFICAR A LOS AMIGOS DEL USUARIO QUE ESTEN CONECTADOS QUE EL USUARIO HA CERRADO SESION (los quitan de su lista de amigos activs)
         String[] amigos = obtenerAmigos(usuario.getNombre());
         notificarAmigosDesconexion(amigos, usuario.getNombre());
+        System.out.println(usuario.getNombre()+" ha cerrado sesion");
     }
 
     public void enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
@@ -234,6 +235,47 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             stm.setString(2,password);
             rs = stm.executeQuery();
             return (rs.next());
+        }catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+    
+    public boolean crearCuenta(String nombre, String password){
+        PreparedStatement stm;
+        try{
+            stm = conexion.prepareStatement("INSERT usuarios VALUES(?, ?)");
+            stm.setString(1, nombre);
+            stm.setString(2,password);
+            stm.executeUpdate();
+            return true;
+        }catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+    
+    public boolean eliminarCuenta(String nombre) {
+        PreparedStatement stm;
+        try{
+            stm  = conexion.prepareStatement("DELETE FROM usuarios WHERE nombre=?");
+            stm.setString(1, nombre);
+            stm.executeUpdate();
+            return true;
+        }catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+    
+    public boolean actualizarPassword(String nombre, String nuevaPasswrod){
+        PreparedStatement stm;
+        try{
+            stm = conexion.prepareStatement("UPDATE usuarios SET  contrasenha=? WHERE nombre=?");
+            stm.setString(1, nuevaPasswrod);
+            stm.setString(2, nombre);
+            stm.executeUpdate();
+            return true;
         }catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return false;
