@@ -43,6 +43,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         //OBTENER LISTA DE AMIGOS DEL USUARIO+ .nuevoAmigoConectado()
         String[] amigos = obtenerAmigos(usuario.getNombre());
         usuario.setAmigos(amigos);
+        obtenerNotificarAmigosConectados(amigos, usuario);
+        usuario.setPeticionesAmistad(obtenerPeticiones(usuario.getNombre()));
     }
 
     public void cerrarSesion(ClientInterface ClientObject) throws java.rmi.RemoteException {
@@ -88,6 +90,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
                 amigos.add(rs.getString("amigo"));
             }
             
+            //Convertir arrayList a array
             String[] amigosArray = new String[amigos.size()];
             amigosArray = amigos.toArray(amigosArray);
             return amigosArray;
@@ -98,26 +101,21 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     }
 
     //Recorre la lista de amigos del cliente; devuelve referencias a todos los conectados y a estos les notifica que se ha conectado
-    private HashMap<String, ClientInterface> obtenerNotificarAmigosConectados(ArrayList<String> amigosTotales, ClientInterface usuario) {
-        HashMap<String, ClientInterface> amigosConectados = new HashMap<>();
+    private void obtenerNotificarAmigosConectados(String[] amigosTotales, ClientInterface usuario) {
         try {
             for (String amigo : amigosTotales) {
                 if (this.clientesActivos.containsKey(amigo)) {
                     usuario.addAmigoConectado(clientesActivos.get(amigo));
-                    amigosConectados.put(amigo, clientesActivos.get(amigo));
                     clientesActivos.get(amigo).nuevoAmigoConectado(usuario);
-
                 }
             }
-            return amigosConectados;
         } catch (RemoteException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
         }
     }
     
     //Consulta en la BD las peticiones de amistad que tiene pendientes el usuario
-    private ArrayList<String> obtenerPeticiones(String usuario){
+    private String[] obtenerPeticiones(String usuario){
          ArrayList<String> peticiones = new ArrayList<String>();
         String emisor;
         PreparedStatement stm;
@@ -128,7 +126,10 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             while (rs.next()) {
                 peticiones.add(rs.getString("amigo"));
             }
-            return peticiones;
+             //Convertir arrayList a array
+            String[] peticionesArray = new String[peticiones.size()];
+            peticionesArray = peticiones.toArray(peticionesArray);
+            return peticionesArray;
         } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return null;
