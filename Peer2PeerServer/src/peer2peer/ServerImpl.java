@@ -41,10 +41,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             System.out.println(usuario.getNombre() + " ha iniciado sesion");
         }
         //OBTENER LISTA DE AMIGOS DEL USUARIO+ .nuevoAmigoConectado()
-        ArrayList<String> amigos = obtenerAmigos(usuario.getNombre());
-        //usuario.setAmigos(amigos);
-        //usuario.setAmigosConectados(obtenerNotificarAmigosConectados(amigos, usuario));
-        //usuario.setPeticionesAmistad(obtenerPeticiones(usuario.getNombre()));
+        String[] amigos = obtenerAmigos(usuario.getNombre());
+        usuario.setAmigos(amigos);
     }
 
     public void cerrarSesion(ClientInterface ClientObject) throws java.rmi.RemoteException {
@@ -78,7 +76,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     }
 
     //Consulta en la base de datos de los amigos de un usuario dado
-    private ArrayList<String> obtenerAmigos(String usuario) {
+    private String[] obtenerAmigos(String usuario) {
         ArrayList<String> amigos = new ArrayList<String>();
         String amigo;
         PreparedStatement stm;
@@ -89,7 +87,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             while (rs.next()) {
                 amigos.add(rs.getString("amigo"));
             }
-            return amigos;
+            return (String[])amigos.toArray();
         } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return null;
