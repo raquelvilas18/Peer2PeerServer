@@ -50,9 +50,22 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     public void cerrarSesion(ClientInterface ClientObject) throws java.rmi.RemoteException {
         //Vector amigos = ClientObject.getAmigos();
     }
+    
+    public void enviarPeticion(String nombre)throws java.rmi.RemoteException{
+        
+    }
 
-    public ClientInterface buscarPersona(String nombre) {
-        return null;
+    public boolean buscarPersona(String nombre) {
+        PreparedStatement stm;
+        try{
+            stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre=?");
+            stm.setString(1,nombre);
+            ResultSet rs = stm.executeQuery();
+            return rs.next();
+        }catch(SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
     }
 
     //Conexion con la Base de datos del sistema
