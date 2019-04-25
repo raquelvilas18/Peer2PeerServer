@@ -62,20 +62,36 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         notificarAmigosDesconexion(amigos, usuario.getNombre());
     }
 
-    public void enviarPeticion(String nombre) throws java.rmi.RemoteException {
-
+    public void enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
+        //Pensar cuando el destinatario esta conectado
+        PreparedStatement stm;
+        try{
+           stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)") ;
+           stm.setString(1,emisor);
+           stm.setString(2,receptor);
+        }catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    public boolean buscarPersona(String nombre) {
+    //Consulta en la base todos los usuarios que contengan los caracteres buscados en su nombre
+    public String[] buscarPersona(String nombre) {
         PreparedStatement stm;
+        ArrayList<String> coincidenciasBusqueda = new ArrayList<>();
         try {
-            stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre=?");
-            stm.setString(1, nombre);
+            stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre like ? ");
+            stm.setString(1, "%"+nombre+"%");
             ResultSet rs = stm.executeQuery();
-            return rs.next();
+            while(rs.next()){
+                coincidenciasBusqueda.add(rs.getString("nombre"));
+            }
+            //Convertir arrayList a array
+            String[] resultadoArray = new String[coincidenciasBusqueda.size()];
+            resultadoArray = coincidenciasBusqueda.toArray(resultadoArray);
+            return resultadoArray;
         } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
+            return null;
         }
     }
 
