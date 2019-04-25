@@ -163,7 +163,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             stm.setString(1, usuario);
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
-                peticiones.add(rs.getString("amigo"));
+                peticiones.add(rs.getString("emisor"));
             }
             //Convertir arrayList a array
             String[] peticionesArray = new String[peticiones.size()];
@@ -181,7 +181,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         try{
             stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre=? AND contrasenha=?");
             stm.setString(1, usuario);
-            stm.setString(2,usuario);
+            stm.setString(2,password);
             rs = stm.executeQuery();
             return (rs.next());
         }catch (SQLException ex) {
