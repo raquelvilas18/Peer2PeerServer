@@ -22,7 +22,7 @@ public interface ClientInterface extends java.rmi.Remote {
     //Añade el objeto cliente a la lista de amigos conectados y lo notifica de que se acaba de conectar (cuando este cliente esta activo y un amigo se conecta)
     public void nuevoAmigoConectado(ClientInterface amigoConectado) throws java.rmi.RemoteException;
 
-    public void nuevoAmigoDesconectado(ClientInterface amigoDesconectado) throws java.rmi.RemoteException;
+    public void nuevoAmigoDesconectado(String amigoDesconectado) throws java.rmi.RemoteException;
 
     public String[] getAmigos() throws java.rmi.RemoteException;
 
