@@ -87,7 +87,10 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             while (rs.next()) {
                 amigos.add(rs.getString("amigo"));
             }
-            return (String[])amigos.toArray();
+            
+            String[] amigosArray = new String[amigos.size()];
+            amigosArray = amigos.toArray(amigosArray);
+            return amigosArray;
         } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -100,6 +103,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         try {
             for (String amigo : amigosTotales) {
                 if (this.clientesActivos.containsKey(amigo)) {
+                    usuario.addAmigoConectado(clientesActivos.get(amigo));
                     amigosConectados.put(amigo, clientesActivos.get(amigo));
                     clientesActivos.get(amigo).nuevoAmigoConectado(usuario);
 

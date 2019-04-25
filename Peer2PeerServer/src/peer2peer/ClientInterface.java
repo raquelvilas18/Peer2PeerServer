@@ -12,6 +12,7 @@ import java.util.*;
  * @author raquel
  */
 public interface ClientInterface extends java.rmi.Remote{
+      public void addAmigoConectado(ClientInterface amigoConectado) throws java.rmi.RemoteException;
     public void nuevoAmigoConectado(ClientInterface amigoConectado) throws java.rmi.RemoteException;
     public void nuevoAmigoDesconectado(ClientInterface amigoDesconectado) throws java.rmi.RemoteException; 
     public  String[] getAmigos() throws java.rmi.RemoteException;
