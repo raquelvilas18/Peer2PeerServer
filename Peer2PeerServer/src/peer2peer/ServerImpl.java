@@ -42,9 +42,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         }
         //OBTENER LISTA DE AMIGOS DEL USUARIO+ .nuevoAmigoConectado()
         ArrayList<String> amigos = obtenerAmigos(usuario.getNombre());
-        usuario.setAmigos(amigos);
-        usuario.setAmigosConectados(obtenerNotificarAmigosConectados(amigos, usuario));
-        usuario.setPeticionesAmistad(obtenerPeticiones(usuario.getNombre()));
+        //usuario.setAmigos(amigos);
+        //usuario.setAmigosConectados(obtenerNotificarAmigosConectados(amigos, usuario));
+        //usuario.setPeticionesAmistad(obtenerPeticiones(usuario.getNombre()));
     }
 
     public void cerrarSesion(ClientInterface ClientObject) throws java.rmi.RemoteException {
@@ -70,9 +70,10 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
             //Conexion
             Class.forName("com.mysql.jdbc.Driver");
-            this.conexion = java.sql.DriverManager.getConnection("jdbc:" + gestor + "://" + servidor + ":" + puerto + "/" + baseDatos, credenciales);
+            this.conexion = java.sql.DriverManager.getConnection("jdbc:" + gestor + "://" + servidor + ":" + puerto + "/" + baseDatos, "Peer2peer","Peer2peer");
         } catch (Exception e) {
             System.out.println("Imposible conectar con la Base de datos");
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 

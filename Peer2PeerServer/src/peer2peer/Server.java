@@ -34,7 +34,6 @@ public class Server {
             System.out.println("holi");
             ServerImpl exportedObj = new ServerImpl();
             registryURL = "rmi://localhost:" + portNum + "/peer2peer";
-            System.out.println("holi2");
             Naming.rebind(registryURL,  exportedObj);
             System.out.println("Callback Server ready.");
         }// end try
