@@ -66,11 +66,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     public boolean enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
         //Pensar cuando el destinatario esta conectado
         if (!emisor.equals(receptor) && !this.sonAmigos(emisor, receptor)) {
+            System.out.println("Peticion entre: " + emisor + "y " + receptor);
             PreparedStatement stm;
             try {
                 stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)");
-                stm.setString(1, emisor);
-                stm.setString(2, receptor);
+                stm.setString(1, receptor);
+                stm.setString(2, emisor);
+                stm.executeUpdate();
                 if(this.clientesActivos.containsKey(receptor)){
                     this.clientesActivos.get(receptor).notificar(emisor + " te ha enviado una peticion de amistad");
                 }
