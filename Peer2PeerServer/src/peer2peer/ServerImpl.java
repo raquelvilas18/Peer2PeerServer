@@ -60,64 +60,18 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         //NOTIFICAR A LOS AMIGOS DEL USUARIO QUE ESTEN CONECTADOS QUE EL USUARIO HA CERRADO SESION (los quitan de su lista de amigos activs)
         String[] amigos = obtenerAmigos(usuario.getNombre());
         notificarAmigosDesconexion(amigos, usuario.getNombre());
-        System.out.println(usuario.getNombre()+" ha cerrado sesion");
+        System.out.println(usuario.getNombre() + " ha cerrado sesion");
     }
 
-    public void enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
-        //Pensar cuando el destinatario esta conectado
-        PreparedStatement stm;
-        try{
-           stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)") ;
-           stm.setString(1,emisor);
-           stm.setString(2,receptor);
-        }catch (SQLException ex) {
-            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    public void aceptarPeticion(String emisor, String receptor){
-        eliminarPeticionBD(emisor,receptor);
-        PreparedStatement stm;
-        try{
-            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
-            stm.setString(1,emisor);
-            stm.setString(2,receptor);
-            stm.executeUpdate();
-            
-            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
-            stm.setString(2,emisor);
-            stm.setString(1,receptor);
-            stm.executeUpdate();
-            
-        }catch (SQLException ex) {
-            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    public void rechazarPeticion(String emisor, String receptor){
-       eliminarPeticionBD(emisor,receptor);
-    }
-
-    private void eliminarPeticionBD(String emisor, String receptor){
-         PreparedStatement stm;
-        try{
-            stm = conexion.prepareStatement("DELETE FROM peticiones WHERE emisor=? AND receptor=?");
-            stm.setString(1,emisor);
-            stm.setString(2, receptor);
-            stm.executeUpdate();
-        }catch (SQLException ex) {
-            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
     //Consulta en la base todos los usuarios que contengan los caracteres buscados en su nombre
     public String[] buscarPersona(String nombre) {
         PreparedStatement stm;
         ArrayList<String> coincidenciasBusqueda = new ArrayList<>();
         try {
             stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre like ? ");
-            stm.setString(1, "%"+nombre+"%");
+            stm.setString(1, "%" + nombre + "%");
             ResultSet rs = stm.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 coincidenciasBusqueda.add(rs.getString("nombre"));
             }
             //Convertir arrayList a array
@@ -129,6 +83,87 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             return null;
         }
     }
+
+    public void enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
+        //Pensar cuando el destinatario esta conectado
+        PreparedStatement stm;
+        try {
+            stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)");
+            stm.setString(1, emisor);
+            stm.setString(2, receptor);
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void aceptarPeticion(String emisor, String receptor) {
+        eliminarPeticionBD(emisor, receptor);
+        PreparedStatement stm;
+        try {
+            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
+            stm.setString(1, emisor);
+            stm.setString(2, receptor);
+            stm.executeUpdate();
+
+            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
+            stm.setString(2, emisor);
+            stm.setString(1, receptor);
+            stm.executeUpdate();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void rechazarPeticion(String emisor, String receptor) {
+        eliminarPeticionBD(emisor, receptor);
+    }
+
+    public boolean crearCuenta(String nombre, String password) {
+        PreparedStatement stm;
+        try {
+            stm = conexion.prepareStatement("INSERT usuarios VALUES(?, ?)");
+            stm.setString(1, nombre);
+            stm.setString(2, password);
+            stm.executeUpdate();
+            System.out.println(nombre + " ha creado una cuenta");
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+
+    public boolean eliminarCuenta(String nombre) {
+        PreparedStatement stm;
+        try {
+            stm = conexion.prepareStatement("DELETE FROM usuarios WHERE nombre=?");
+            stm.setString(1, nombre);
+            stm.executeUpdate();
+            System.out.println(nombre + " ha eliminado su cuenta");
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+
+    public boolean actualizarPassword(String nombre, String nuevaPasswrod) {
+        PreparedStatement stm;
+        try {
+            stm = conexion.prepareStatement("UPDATE usuarios SET  contrasenha=? WHERE nombre=?");
+            stm.setString(1, nuevaPasswrod);
+            stm.setString(2, nombre);
+            stm.executeUpdate();
+            System.out.println(nombre + " ha actualizado su contraseña");
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+    
+    //------------------METODOS AUXILIARES ------------------------------//
 
     //Conexion con la Base de datos del sistema
     private void initConexion() {
@@ -229,56 +264,27 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     private boolean comprobarPassword(String usuario, String password) {
         PreparedStatement stm;
         ResultSet rs;
-        try{
+        try {
             stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre=? AND contrasenha=?");
             stm.setString(1, usuario);
-            stm.setString(2,password);
+            stm.setString(2, password);
             rs = stm.executeQuery();
             return (rs.next());
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
-    
-    public boolean crearCuenta(String nombre, String password){
+
+    private void eliminarPeticionBD(String emisor, String receptor) {
         PreparedStatement stm;
-        try{
-            stm = conexion.prepareStatement("INSERT usuarios VALUES(?, ?)");
-            stm.setString(1, nombre);
-            stm.setString(2,password);
+        try {
+            stm = conexion.prepareStatement("DELETE FROM peticiones WHERE emisor=? AND receptor=?");
+            stm.setString(1, emisor);
+            stm.setString(2, receptor);
             stm.executeUpdate();
-            return true;
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-    }
-    
-    public boolean eliminarCuenta(String nombre) {
-        PreparedStatement stm;
-        try{
-            stm  = conexion.prepareStatement("DELETE FROM usuarios WHERE nombre=?");
-            stm.setString(1, nombre);
-            stm.executeUpdate();
-            return true;
-        }catch (SQLException ex) {
-            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-    }
-    
-    public boolean actualizarPassword(String nombre, String nuevaPasswrod){
-        PreparedStatement stm;
-        try{
-            stm = conexion.prepareStatement("UPDATE usuarios SET  contrasenha=? WHERE nombre=?");
-            stm.setString(1, nuevaPasswrod);
-            stm.setString(2, nombre);
-            stm.executeUpdate();
-            return true;
-        }catch (SQLException ex) {
-            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
     }
 
