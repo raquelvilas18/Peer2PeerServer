@@ -32,4 +32,6 @@ public interface ServerInterface extends java.rmi.Remote{
     public boolean actualizarPassword(String nombre, String nuevaPasswrod)throws java.rmi.RemoteException;
     
     public void acualizarPeticiones(ClientInterface ClientObject) throws java.rmi.RemoteException;
+    
+    public void acualizarAmigos(ClientInterface ClientObject) throws java.rmi.RemoteException;
 }

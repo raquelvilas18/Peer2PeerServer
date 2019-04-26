@@ -65,13 +65,15 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
     public boolean enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
         //Pensar cuando el destinatario esta conectado
-        //if (!emisor.equals(receptor) && !this.sonAmigos(emisor, receptor)) {
+        if (!emisor.equals(receptor) && !this.sonAmigos(emisor, receptor)) {
+            System.out.println("Peticion entre: " + emisor + "y " + receptor);
             PreparedStatement stm;
             try {
                 stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)");
                 stm.setString(1, receptor);
                 stm.setString(2, emisor);
-                if(this.clientesActivos.containsKey(receptor)){
+                stm.executeUpdate();
+                if (this.clientesActivos.containsKey(receptor)) {
                     this.clientesActivos.get(receptor).notificar(emisor + " te ha enviado una peticion de amistad");
                 }
                 return true;
@@ -79,32 +81,45 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
                 Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
-//        } else {
-//            return false;
-//        }
+        } else {
+            return false;
+        }
     }
 
     public void aceptarPeticion(String emisor, String receptor) {
         eliminarPeticionBD(emisor, receptor);
         PreparedStatement stm;
         try {
-            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
+            stm = conexion.prepareStatement("INSERT INTO amigos VALUES(?,?)");
             stm.setString(1, emisor);
             stm.setString(2, receptor);
             stm.executeUpdate();
 
-            stm = conexion.prepareStatement("INSERT amigos VALUES(?,?)");
+            stm = conexion.prepareStatement("INSERT INTO amigos VALUES(?,?)");
             stm.setString(2, emisor);
             stm.setString(1, receptor);
             stm.executeUpdate();
 
+            if (this.clientesActivos.containsKey(emisor)) {
+                this.clientesActivos.get(emisor).notificar(receptor + " ha aceptado tu peticion de amistad");
+            }
+
         } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RemoteException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public void rechazarPeticion(String emisor, String receptor) {
-        eliminarPeticionBD(emisor, receptor);
+        try {
+            eliminarPeticionBD(emisor, receptor);
+            if (this.clientesActivos.containsKey(emisor)) {
+                this.clientesActivos.get(emisor).notificar(receptor + " ha rechazado tu peticion de amistad");
+            }
+        } catch (RemoteException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     //Consulta en la base todos los usuarios que contengan los caracteres buscados en su nombre
@@ -198,6 +213,14 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         } catch (Exception e) {
             System.out.println("Imposible conectar con la Base de datos");
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    public void acualizarAmigos(ClientInterface cliente) {
+        try {
+            cliente.setAmigos(this.obtenerAmigos(cliente.getNombre()));
+        } catch (RemoteException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -321,21 +344,21 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             return false;
         }
     }
-    
-    public boolean peticionYaEnviada(String emisor, String receptor){
+
+    public boolean peticionYaEnviada(String emisor, String receptor) {
         PreparedStatement stm;
         ResultSet rs;
         try {
             stm = conexion.prepareStatement("SELECT * FROM peticiones WHERE emisor=? AND receptor=?");
-            stm.setString(1,emisor);
-            stm.setString(2,receptor);
+            stm.setString(1, emisor);
+            stm.setString(2, receptor);
             rs = stm.executeQuery();
             return (rs.next());
         } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
-        
+
     }
 
 }
