@@ -65,12 +65,12 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
     public boolean enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
         //Pensar cuando el destinatario esta conectado
-        if (!emisor.equals(receptor) && !this.sonAmigos(emisor, receptor)) {
+        //if (!emisor.equals(receptor) && !this.sonAmigos(emisor, receptor)) {
             PreparedStatement stm;
             try {
                 stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)");
-                stm.setString(1, emisor);
-                stm.setString(2, receptor);
+                stm.setString(1, receptor);
+                stm.setString(2, emisor);
                 if(this.clientesActivos.containsKey(receptor)){
                     this.clientesActivos.get(receptor).notificar(emisor + " te ha enviado una peticion de amistad");
                 }
@@ -79,9 +79,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
                 Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
-        } else {
-            return false;
-        }
+//        } else {
+//            return false;
+//        }
     }
 
     public void aceptarPeticion(String emisor, String receptor) {
@@ -116,7 +116,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             stm.setString(1, "%" + nombre + "%");
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
-                if (!rs.getString("nombre").equals(usuario) && !sonAmigos(usuario, rs.getString("nombre"))) {
+                if (!rs.getString("nombre").equals(usuario) && !sonAmigos(usuario, rs.getString("nombre")) && !peticionYaEnviada(usuario, rs.getString("nombre"))) {
                     coincidenciasBusqueda.add(rs.getString("nombre"));
                 }
             }
@@ -320,6 +320,22 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
+    }
+    
+    public boolean peticionYaEnviada(String emisor, String receptor){
+        PreparedStatement stm;
+        ResultSet rs;
+        try {
+            stm = conexion.prepareStatement("SELECT * FROM peticiones WHERE emisor=? AND receptor=?");
+            stm.setString(1,emisor);
+            stm.setString(2,receptor);
+            rs = stm.executeQuery();
+            return (rs.next());
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        
     }
 
 }
