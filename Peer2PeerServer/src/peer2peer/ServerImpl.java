@@ -105,7 +105,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
     }
 
     //Consulta en la base todos los usuarios que contengan los caracteres buscados en su nombre
-    public String[] buscarPersona(String nombre) {
+    public String[] buscarPersona(String usuario, String nombre) {
         PreparedStatement stm;
         ArrayList<String> coincidenciasBusqueda = new ArrayList<>();
         try {
@@ -113,7 +113,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             stm.setString(1, "%" + nombre + "%");
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
-                coincidenciasBusqueda.add(rs.getString("nombre"));
+                if (!rs.getString("nombre").equals(usuario) && !sonAmigos(usuario, rs.getString("nombre"))) {
+                    coincidenciasBusqueda.add(rs.getString("nombre"));
+                }
             }
             //Convertir arrayList a array
             String[] resultadoArray = new String[coincidenciasBusqueda.size()];
@@ -293,7 +295,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             stm.setString(2, receptor);
             stm.executeUpdate();
             //Elimina tambien (si existiera) la peticion que el otro usuario le ha hecho al primero
-             stm = conexion.prepareStatement("DELETE FROM peticiones WHERE emisor=? AND receptor=?");
+            stm = conexion.prepareStatement("DELETE FROM peticiones WHERE emisor=? AND receptor=?");
             stm.setString(2, emisor);
             stm.setString(1, receptor);
             stm.executeUpdate();
@@ -301,8 +303,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public boolean sonAmigos(String usr1, String usr2){
+
+    public boolean sonAmigos(String usr1, String usr2) {
         try {
             PreparedStatement stm;
             ResultSet rs;
