@@ -19,7 +19,7 @@ public interface ServerInterface extends java.rmi.Remote{
     
     public String[] buscarPersona(String nombre)throws java.rmi.RemoteException;
     
-    public void enviarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
+    public boolean enviarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
     
     public void aceptarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
     

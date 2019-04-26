@@ -63,15 +63,17 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         System.out.println(usuario.getNombre()+" ha cerrado sesion");
     }
 
-    public void enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
+    public boolean enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
         //Pensar cuando el destinatario esta conectado
         PreparedStatement stm;
         try{
            stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)") ;
            stm.setString(1,emisor);
            stm.setString(2,receptor);
+           return true;
         }catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
     }
     
