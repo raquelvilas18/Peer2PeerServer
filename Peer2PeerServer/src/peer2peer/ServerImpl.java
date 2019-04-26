@@ -63,36 +63,21 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
         System.out.println(usuario.getNombre() + " ha cerrado sesion");
     }
 
-    //Consulta en la base todos los usuarios que contengan los caracteres buscados en su nombre
-    public String[] buscarPersona(String nombre) {
-        PreparedStatement stm;
-        ArrayList<String> coincidenciasBusqueda = new ArrayList<>();
-        try {
-            stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre like ? ");
-            stm.setString(1, "%" + nombre + "%");
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) {
-                coincidenciasBusqueda.add(rs.getString("nombre"));
-            }
-            //Convertir arrayList a array
-            String[] resultadoArray = new String[coincidenciasBusqueda.size()];
-            resultadoArray = coincidenciasBusqueda.toArray(resultadoArray);
-            return resultadoArray;
-        } catch (SQLException ex) {
-            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-    }
-
-    public void enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
+    public boolean enviarPeticion(String emisor, String receptor) throws java.rmi.RemoteException {
         //Pensar cuando el destinatario esta conectado
-        PreparedStatement stm;
-        try {
-            stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)");
-            stm.setString(1, emisor);
-            stm.setString(2, receptor);
-        } catch (SQLException ex) {
-            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        if (!emisor.equals(receptor) && !this.sonAmigos(emisor, receptor)) {
+            PreparedStatement stm;
+            try {
+                stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)");
+                stm.setString(1, emisor);
+                stm.setString(2, receptor);
+                return true;
+            } catch (SQLException ex) {
+                Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 
@@ -117,6 +102,27 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
 
     public void rechazarPeticion(String emisor, String receptor) {
         eliminarPeticionBD(emisor, receptor);
+    }
+
+    //Consulta en la base todos los usuarios que contengan los caracteres buscados en su nombre
+    public String[] buscarPersona(String nombre) {
+        PreparedStatement stm;
+        ArrayList<String> coincidenciasBusqueda = new ArrayList<>();
+        try {
+            stm = conexion.prepareStatement("SELECT * FROM usuarios WHERE nombre like ? ");
+            stm.setString(1, "%" + nombre + "%");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                coincidenciasBusqueda.add(rs.getString("nombre"));
+            }
+            //Convertir arrayList a array
+            String[] resultadoArray = new String[coincidenciasBusqueda.size()];
+            resultadoArray = coincidenciasBusqueda.toArray(resultadoArray);
+            return resultadoArray;
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     public boolean crearCuenta(String nombre, String password) {
@@ -162,9 +168,12 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             return false;
         }
     }
-    
-    //------------------METODOS AUXILIARES ------------------------------//
 
+    public void acualizarPeticiones(ClientInterface ClientObject) throws RemoteException {
+        ClientObject.setPeticionesAmistad(this.obtenerPeticiones(ClientObject.getNombre()));
+    }
+
+    //------------------METODOS AUXILIARES ------------------------------//
     //Conexion con la Base de datos del sistema
     private void initConexion() {
         try {
@@ -283,8 +292,28 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
             stm.setString(1, emisor);
             stm.setString(2, receptor);
             stm.executeUpdate();
+            //Elimina tambien (si existiera) la peticion que el otro usuario le ha hecho al primero
+             stm = conexion.prepareStatement("DELETE FROM peticiones WHERE emisor=? AND receptor=?");
+            stm.setString(2, emisor);
+            stm.setString(1, receptor);
+            stm.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public boolean sonAmigos(String usr1, String usr2){
+        try {
+            PreparedStatement stm;
+            ResultSet rs;
+            stm = conexion.prepareStatement("SELECT * FROM amigos WHERE usuario=? AND amigo=?");
+            stm.setString(1, usr1);
+            stm.setString(2, usr2);
+            rs = stm.executeQuery();
+            return (rs.next());
+        } catch (SQLException ex) {
+            Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
     }
 

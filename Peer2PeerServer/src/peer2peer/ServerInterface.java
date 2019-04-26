@@ -19,7 +19,7 @@ public interface ServerInterface extends java.rmi.Remote{
     
     public String[] buscarPersona(String nombre)throws java.rmi.RemoteException;
     
-    public void enviarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
+    public boolean enviarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
     
     public void aceptarPeticion(String emisor, String receptor)throws java.rmi.RemoteException;
     
@@ -30,4 +30,6 @@ public interface ServerInterface extends java.rmi.Remote{
     public boolean eliminarCuenta(String nombre) throws java.rmi.RemoteException;
     
     public boolean actualizarPassword(String nombre, String nuevaPasswrod)throws java.rmi.RemoteException;
+    
+    public void acualizarPeticiones(ClientInterface ClientObject) throws java.rmi.RemoteException;
 }
