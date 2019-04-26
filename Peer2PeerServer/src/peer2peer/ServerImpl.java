@@ -71,6 +71,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerInterface {
                 stm = conexion.prepareStatement("INSERT peticiones VALUES(?,?)");
                 stm.setString(1, emisor);
                 stm.setString(2, receptor);
+                if(this.clientesActivos.containsKey(receptor)){
+                    this.clientesActivos.get(receptor).notificar(emisor + " te ha enviado una peticion de amistad");
+                }
                 return true;
             } catch (SQLException ex) {
                 Logger.getLogger(ServerImpl.class.getName()).log(Level.SEVERE, null, ex);
